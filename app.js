@@ -32,11 +32,10 @@ App = {
         $("#ourButton").click(function(e) {
             var name = $("#nameInput").val();
             App.createZombie(name);
-        })
+        });
         $(".kittyImage").click(function(e) {
-            App.
-            
-        })
+            App.feedOnKitty();
+        });
     },
 
     createZombie: function(_name) {
@@ -53,6 +52,30 @@ App = {
                 zombieFeedingInstance = instance;
                 return zombieFeedingInstance.createRandomZombie(_name, {from: account});
             }).then(function(tx){
+                var result = tx.logs[0].args;
+                App.generateZombie(result.zombieId, result.name, result.dna);
+            }).catch(function(error) {
+                console.log(error.message);
+            });
+        });
+    },
+
+    feedOnKitty: function() {
+        var zombieFeedingInstance;
+        var zombieId = 1;
+        var kittyId = 1;
+
+        web3.eth.getAccounts(function(error, acccounts) {
+            if (error) {
+                console.log(error);
+            }
+
+            var account = accounts[0];
+
+            App.contracts.zombieFeeding.deployed().then(function(instance) {
+                zombieFeedingInstance = instance;
+                return instance.feedOnKitty(zombieId, kittyId, {from: account});
+            }).then(function(tx) {
                 var result = tx.logs[0].args;
                 App.generateZombie(result.zombieId, result.name, result.dna);
             }).catch(function(error) {
